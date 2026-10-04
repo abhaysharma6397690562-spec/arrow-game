@@ -16,14 +16,11 @@ jobs:
           unzip -o "arrow-out---50+-levels.zip"
           rm -f "arrow-out---50+-levels.zip"
 
-      # --- YEH NAYA STEP ADD KAREIN ---
       - name: Fix Package Name to com.app.arrowout
         run: |
-          # build.gradle aur AndroidManifest me package name aur applicationId replace karna
           find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" -o -name "AndroidManifest.xml" \) -exec sed -i -E 's/applicationId[[:space:]]+["'\''].*["'\'']/applicationId "com.app.arrowout"/g' {} +
           find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/namespace[[:space:]]+["'\''].*["'\'']/namespace = "com.app.arrowout"/g' {} +
           echo "Package name updated to com.app.arrowout"
-      # ---------------------------------
 
       - name: Setup Java 21
         uses: actions/setup-java@v4
