@@ -1,0 +1,50 @@
+name: Generate Play Store AAB
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Extract Project Zip
+        run: |
+          unzip -o arrow-out---50+-levels.zip
+          rm arrow-out---50+-levels.zip
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Create Keystore
+        run: |
+          keytool -genkey -v -keystore my-upload-key.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000 -storepass abhay12345 -keypass abhay12345 -dname "CN=Abhay, OU=Mobile, O=Apps, L=Narora, ST=UP, C=IN"
+
+      - name: Grant Execute Permission
+        run: chmod +x gradlew
+
+      - name: Build Signed Release AAB
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: abhay12345
+          KEY_PASSWORD: abhay12345
+        run: ./gradlew bundleRelease --stacktrace
+
+      - name: Upload Signed AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArrowOut-Release-AAB
+          path: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload Keystore Backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: Key-Backup
+          path: my-upload-key.jks
+          
